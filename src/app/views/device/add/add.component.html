@@ -1,0 +1,15 @@
+<div class="card flex justify-center">
+        <span class="p-text-secondary block mb-8">Edit Device</span>
+        <div class="flex items-center gap-4 mb-4">
+            <label for="username" class="font-semibold w-24">Device Id</label>
+            <input type="text" class="form-control" [(ngModel)]="id">
+        </div>
+        <div class="flex items-center gap-4 mb-8">
+            <label for="email" class="font-semibold w-24">Device Name</label>
+            <input pInputText id="email" class="flex-auto"    [(ngModel)]="id" autocomplete="off" />
+        </div>
+        <div class="flex justify-end gap-2">
+            <p-button label="Cancel" severity="secondary" (click)="visible = false" />
+            <p-button label="Save" (click)="visible = false" />
+        </div>
+</div>

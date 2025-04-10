@@ -1,0 +1,26 @@
+<div class="master-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2>Daitan</h2>
+    <nav>
+      <ul>
+        <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+        <li><a routerLink="/device">Devices</a></li>
+            </ul>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="content">
+    <!-- Optional Topbar -->
+    <header class="topbar">
+      <p>Welcome User</p>
+      <a href="#" (click)="logout()" class="logout-link">Logout</a>
+    </header>
+
+    <!-- Routed view -->
+    <section class="main-view">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
