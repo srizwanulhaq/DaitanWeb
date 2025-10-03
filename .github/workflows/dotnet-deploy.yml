@@ -1,0 +1,77 @@
+name: .NET Core CI/CD
+
+# prevent duplicate runs for the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'    # change to 7.0.x if needed
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        # if your .sln is at repo root, use the .sln path; otherwise point to it
+        run: dotnet restore YourSolution.sln
+
+      - name: Build
+        run: dotnet build YourSolution.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test YourSolution.sln --no-build --verbosity normal
+
+      - name: Publish app
+        # publish the actual project — change this path to your web project (.csproj)
+        run: dotnet publish ./src/MyApp/MyApp.csproj -c Release -o ./publish --no-build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-app
+          path: ./publish
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    # deploy only on push to main (not for PRs)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dotnet-app
+          path: ./publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: YOUR_AZURE_APP_NAME
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
